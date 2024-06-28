@@ -47,19 +47,17 @@ function performUnitOfWork(fiber){
         }
     }
 
-    if(!fiber.stateNode){
-        // 如果当前节点没有对应的dom元素就创建对应的dom，并储存
-        switch(fiber.tag) {
-            case HostText:
-                fiber.stateNode = createTextNode(fiber.pendingProps.content);
-                break
-            case HostComponent:
-                fiber.stateNode = createElement(fiber.type);
-                break
-            default:
-                console.log('未实现的类型')
-                break
-        }
+    // 如果当前节点没有对应的dom元素就创建对应的dom，并储存
+    switch(fiber.tag) {
+        case HostText:
+            fiber.stateNode = createTextNode(fiber.pendingProps.content);
+            break
+        case HostComponent:
+            fiber.stateNode = createElement(fiber.type);
+            break
+        default:
+            console.log('未实现的类型')
+            break
     }
     
     if(fiber.return){
