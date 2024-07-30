@@ -6,7 +6,7 @@ const createRoot = (container) => {
 
     return {
         render(reactElement) {
-            const hostRootFiber = new FiberNode(HostRoot, { children: [reactElement] }, null);
+            const hostRootFiber = new FiberNode(HostRoot, { children: reactElement }, null);
             hostRootFiber.stateNode = container;
 
             renderRoot(hostRootFiber);

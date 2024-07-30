@@ -11,6 +11,7 @@ export class FiberNode {
     return;
     sibling;
     index;
+    memoizedState;
 
     constructor(tag, props, key) {
         this.tag = tag;
@@ -23,6 +24,7 @@ export class FiberNode {
         this.return = null;
         this.sibling = null;
         this.index = 0;
+        this.memoizedState = null
     }
 }
 
