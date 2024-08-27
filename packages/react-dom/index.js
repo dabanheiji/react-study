@@ -12,28 +12,22 @@ const createRoot = (container) => {
 const appendChildLoop = (parent, childrenReactElement) => {
   if (!childrenReactElement) return;
 
-  if (Array.isArray(childrenReactElement)) {
-    for (const reactElement of childrenReactElement) {
-      // 创建插入节点
-      const node = createChild(reactElement);
-      appendChild(parent, node);
+  const node = createChild(childrenReactElement);
+  appendChild(parent, node);
 
-      // 递归插入子节点
-      if (reactElement.props && reactElement.props.children) {
-        appendChildLoop(node, reactElement.props.children);
-      }
-    }
-  } else if (typeof childrenReactElement === "object") {
-    // 创建插入节点
-    const node = createChild(childrenReactElement);
-    appendChild(parent, node);
+  // 递归插入子节点
+  if (childrenReactElement.props && childrenReactElement.props.children) {
+    const children = childrenReactElement.props.children;
 
-    // 递归插入子节点
-    if (childrenReactElement.props && childrenReactElement.props.children) {
-      appendChildLoop(node, childrenReactElement.props.children);
+    if (Array.isArray(childrenReactElement.props.children)) {
+      childrenReactElement.props.children.forEach((child) => {
+        appendChildLoop(node, child);
+      });
+    } else if(typeof childrenReactElement.props.children === 'object') {
+      appendChildLoop(node, children);
+    } else {
+      console.log('未考虑到的类型', children);
     }
-  } else {
-    console.log("未考虑的场景", childrenReactElement);
   }
 };
 
