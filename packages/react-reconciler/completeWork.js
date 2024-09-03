@@ -11,7 +11,6 @@ export function completeWork(workInProgress) {
             break
         case HostText:
             const textInstance = createTextNode(newProps.content);
-            appendAllChildren(textInstance, workInProgress);
             workInProgress.stateNode = textInstance;
             break
         case HostComponent:
