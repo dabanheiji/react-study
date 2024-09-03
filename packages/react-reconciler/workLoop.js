@@ -43,7 +43,10 @@ function commitRoot(rootFiber) {
     console.log('commitRoot', rootFiber);
     let node = rootFiber.child;
     while(node !== null) {
-        appendChild(rootFiber.stateNode, node.stateNode);
-        node = node.sibling;
+        if(node.tag === HostComponent || node.tag === HostText) {
+            appendChild(rootFiber.stateNode, node.stateNode);
+            break;
+        }
+        node = node.child;
     }
 }

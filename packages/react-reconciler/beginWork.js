@@ -1,5 +1,5 @@
 import { FiberNode, createFiberFromElement } from "./fiber";
-import { HostComponent, HostRoot, HostText } from "./workTag";
+import { FunctionComponent, HostComponent, HostRoot, HostText } from "./workTag";
 
 export function beginWork(workInProgress) {
     // console.log('beginWork', workInProgress)
@@ -10,9 +10,17 @@ export function beginWork(workInProgress) {
             return updateHostComponent(workInProgress);
         case HostText:
             return null;
+        case FunctionComponent:
+            return updateFunctionComponent(workInProgress);
         default:
             return null;
     }
+}
+
+function updateFunctionComponent(workInProgress) {
+    const nextChildren = workInProgress.type();
+    mountChildFibers(workInProgress, nextChildren);
+    return workInProgress.child;
 }
 
 function updateHostRoot(workInProgress) {
