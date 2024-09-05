@@ -1,21 +1,24 @@
 import { appendChild, createElement, createTextNode } from "../react-dom/hostConfig";
 import { beginWork } from "./beginWork";
 import { completeWork } from "./completeWork";
-import { FiberNode, createFiberFromElement } from "./fiber";
+import { FiberNode, createFiberFromElement, createWorkInProgress } from "./fiber";
 import { HostComponent, HostRoot, HostText } from "./workTag";
 
 let workInProgress = null;
 
-export const renderRoot = (rootFiber) => {
+export const renderRoot = (root) => {
     // jsx -> fiber
-    console.log(rootFiber);
-    workInProgress = rootFiber;
+    console.log(root);
+    workInProgress = createWorkInProgress(root.current, {});
 
     while(workInProgress !== null) {
         performUnitOfWork(workInProgress);
     }
 
-    commitRoot(rootFiber);
+    const finishedWork = root.current.alternate;
+    root.finishedWork = finishedWork;
+
+    commitRoot(root);
 }
 
 // 渲染并创建fiber节点，组成fiber的链表结构
@@ -39,12 +42,17 @@ function performUnitOfWork(fiber){
     }
 }
 
-function commitRoot(rootFiber) {
-    console.log('commitRoot', rootFiber);
+function commitRoot(root) {
+    console.log('commitRoot', root);
+    const finishedWork = root.finishedWork;
+    if(finishedWork === null) {
+        return;
+    }
+    root.finishedWork = null;
     let node = rootFiber.child;
     while(node !== null) {
         if(node.tag === HostComponent || node.tag === HostText) {
-            appendChild(rootFiber.stateNode, node.stateNode);
+            appendChild(rootFiber.stateNode.container, node.stateNode);
             break;
         }
         node = node.child;
