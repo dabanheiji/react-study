@@ -87,6 +87,7 @@ export const createWorkInProgress = (current, pendingProps) => {
         workInProgress = new FiberNode(current.tag, pendingProps, current.key);
         workInProgress.stateNode = current.stateNode;
         workInProgress.alternate = current;
+        workInProgress.pendingProps = pendingProps;
         current.alternate = workInProgress;
     } else {
         workInProgress.pendingProps = pendingProps;

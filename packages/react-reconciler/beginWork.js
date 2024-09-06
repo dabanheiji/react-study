@@ -3,7 +3,7 @@ import { ChildDeletion, Placement } from "./fiberFlags";
 import { FunctionComponent, HostComponent, HostRoot, HostText } from "./workTag";
 
 export function beginWork(workInProgress) {
-    // console.log('beginWork', workInProgress)
+    console.log('beginWork', workInProgress)
     switch(workInProgress.tag) {
         case HostRoot:
             return updateHostRoot(workInProgress);
@@ -146,6 +146,7 @@ function updateChildFibers(workInProgress, currentFiber, nextChildren) {
     }
 
     // 说明是更新阶段新出现的节点，需要打上Placement标记
+    console.log('nextChildren', nextChildren, workInProgress);
     const fiber = createFiberFromElement(nextChildren);
     fiber.return = workInProgress;
     fiber.flags |= Placement;

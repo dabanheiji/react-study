@@ -1,4 +1,6 @@
 import { createElement, createTextNode, appendChild } from "../react-dom/hostConfig";
+import { FiberNode } from "./fiber";
+import { NoFlags } from "./fiberFlags";
 import { HostComponent, HostRoot, HostText } from "./workTag";
 
 export function completeWork(workInProgress) {
@@ -8,15 +10,18 @@ export function completeWork(workInProgress) {
 
     switch (workInProgress.tag) {
         case HostRoot:
+            bubbleProperties(workInProgress)
             break
         case HostText:
             const textInstance = createTextNode(newProps.content);
             workInProgress.stateNode = textInstance;
+            bubbleProperties(workInProgress)
             break
         case HostComponent:
             const instance = createElement(workInProgress.type, newProps);
             appendAllChildren(instance, workInProgress);
             workInProgress.stateNode = instance;
+            bubbleProperties(workInProgress)
             break
     }
 }
@@ -51,4 +56,22 @@ function appendAllChildren(parent, workInProgress) {
         node.sibling.return = node.return;
         node = node.sibling;
     }
+}
+
+/**
+ * 冒泡flags 到父节点
+ * @param {FiberNode} workInProgress 
+ */
+function bubbleProperties(workInProgress) {
+    let subtreeFlags = NoFlags;
+	let child = workInProgress.child;
+
+    while (child !== null) {
+		subtreeFlags |= child.subtreeFlags;
+		subtreeFlags |= child.flags;
+
+		child.return = workInProgress;
+		child = child.sibling;
+	}
+	workInProgress.subtreeFlags |= subtreeFlags;
 }

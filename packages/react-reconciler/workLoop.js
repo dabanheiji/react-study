@@ -1,5 +1,6 @@
 import { appendChild, createElement, createTextNode } from "../react-dom/hostConfig";
 import { beginWork } from "./beginWork";
+import { commitMutationEffects } from "./commitWork";
 import { completeWork } from "./completeWork";
 import { FiberNode, createFiberFromElement, createWorkInProgress } from "./fiber";
 import { HostComponent, HostRoot, HostText } from "./workTag";
@@ -9,7 +10,7 @@ let workInProgress = null;
 export const renderRoot = (root) => {
     // jsx -> fiber
     console.log(root);
-    workInProgress = createWorkInProgress(root.current, {});
+    workInProgress = createWorkInProgress(root.current, root.current.pendingProps);
 
     while(workInProgress !== null) {
         performUnitOfWork(workInProgress);
@@ -49,12 +50,6 @@ function commitRoot(root) {
         return;
     }
     root.finishedWork = null;
-    let node = rootFiber.child;
-    while(node !== null) {
-        if(node.tag === HostComponent || node.tag === HostText) {
-            appendChild(rootFiber.stateNode.container, node.stateNode);
-            break;
-        }
-        node = node.child;
-    }
+    
+    commitMutationEffects(finishedWork);
 }
