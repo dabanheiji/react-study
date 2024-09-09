@@ -1,3 +1,5 @@
+import { resolveDispatcher } from "./currentDispatcher";
+
 function ReactElement(type, key, ref, props) {
     return {
         type,
@@ -36,6 +38,11 @@ function jsx(type, config, ...children) {
     }
 
     return ReactElement(type, key, ref, props);
+}
+
+export const useState = (initialState) => {
+	const dispatcher = resolveDispatcher();
+	return dispatcher.useState(initialState);
 }
 
 export default {

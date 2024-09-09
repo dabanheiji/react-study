@@ -5,6 +5,7 @@ export class FiberNode {
     tag;
     type;
     pendingProps;
+    memoizedProps;
     key;
     stateNode;
     
@@ -23,6 +24,7 @@ export class FiberNode {
     constructor(tag, props, key) {
         this.tag = tag;
         this.pendingProps = props;
+        this.memoizedProps = null;
         this.key = key;
         this.type = null;
         this.stateNode = null;
@@ -95,5 +97,6 @@ export const createWorkInProgress = (current, pendingProps) => {
     workInProgress.type = current.type;
     workInProgress.child = current.child;
     workInProgress.memoizedState = current.memoizedState;
+    workInProgress.memoizedProps = current.memoizedProps;
     return workInProgress;
 }

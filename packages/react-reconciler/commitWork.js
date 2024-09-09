@@ -1,6 +1,6 @@
-import { appendChild } from "../react-dom/hostConfig";
+import { appendChild, commitTextUpdate } from "../react-dom/hostConfig";
 import { FiberNode } from "./fiber";
-import { MutationMask, NoFlags, Placement } from "./fiberFlags";
+import { MutationMask, NoFlags, Placement, Update } from "./fiberFlags";
 import { HostComponent, HostRoot, HostText } from "./workTag";
 
 export function commitMutationEffects(finishedWork) {
@@ -42,6 +42,11 @@ function commitMutationEffectsOnFiber(workInProgress) {
         commitPlacement(workInProgress);
         workInProgress.flags &= ~Placement;
     }
+
+    if ((flags & Update) !== NoFlags) {
+		commitUpdate(workInProgress);
+		workInProgress.flags &= ~Update;
+	}
 }
 
 function commitPlacement(workInProgress) {
@@ -49,6 +54,20 @@ function commitPlacement(workInProgress) {
     if(hostParent !== null) {
         appendPlacementNodeIntoContainer(workInProgress, hostParent)
     }
+}
+
+function commitUpdate(fiber) {
+    switch (fiber.tag) {
+		case HostText:
+			const text = fiber.memoizedProps?.content;
+			commitTextUpdate(fiber.stateNode, text);
+			break;
+		default:
+			if (__DEV__) {
+				console.warn('为实现的update类型', fiber);
+			}
+			break;
+	}
 }
 
 function getHostParent(fiber) {

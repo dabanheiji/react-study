@@ -1,26 +1,45 @@
 import { createElement, createTextNode, appendChild } from "../react-dom/hostConfig";
 import { FiberNode } from "./fiber";
-import { NoFlags } from "./fiberFlags";
-import { HostComponent, HostRoot, HostText } from "./workTag";
+import { NoFlags, Update } from "./fiberFlags";
+import { FunctionComponent, HostComponent, HostRoot, HostText } from "./workTag";
+
+function markUpdate(fiber) {
+	fiber.flags |= Update;
+}
 
 export function completeWork(workInProgress) {
-    // console.log('completeWork', workInProgress.tag, workInProgress.type);
     // 创建fiber对应的dom节点
     const newProps = workInProgress.pendingProps;
+    const current = workInProgress.alternate;
 
     switch (workInProgress.tag) {
         case HostRoot:
             bubbleProperties(workInProgress)
             break
         case HostText:
-            const textInstance = createTextNode(newProps.content);
-            workInProgress.stateNode = textInstance;
+            if(current === null) {
+                const textInstance = createTextNode(newProps.content);
+                workInProgress.stateNode = textInstance;
+            } else {
+                const oldText = current.memoizedProps.content;
+				const newText = newProps.content;
+				if (oldText !== newText) {
+					markUpdate(workInProgress);
+				}
+            }
             bubbleProperties(workInProgress)
             break
         case HostComponent:
-            const instance = createElement(workInProgress.type, newProps);
-            appendAllChildren(instance, workInProgress);
-            workInProgress.stateNode = instance;
+            if(current === null) {
+                const instance = createElement(workInProgress.type, newProps);
+                appendAllChildren(instance, workInProgress);
+                workInProgress.stateNode = instance;
+            } else {
+                // TODO
+            }
+            bubbleProperties(workInProgress)
+            break
+        case FunctionComponent:
             bubbleProperties(workInProgress)
             break
     }
@@ -73,5 +92,6 @@ function bubbleProperties(workInProgress) {
 		child.return = workInProgress;
 		child = child.sibling;
 	}
+    console.log('bubbleProperties', workInProgress, subtreeFlags);
 	workInProgress.subtreeFlags |= subtreeFlags;
 }

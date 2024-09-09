@@ -7,6 +7,24 @@ import { HostComponent, HostRoot, HostText } from "./workTag";
 
 let workInProgress = null;
 
+export const scheduleUpdateOnFiber = (fiber) => {
+    const root = markUpdateFromFiberToRoot(fiber);
+	renderRoot(root);
+}
+
+function markUpdateFromFiberToRoot(fiber) {
+	let node = fiber;
+	let parent = node.return;
+	while (parent !== null) {
+		node = parent;
+		parent = node.return;
+	}
+	if (node.tag === HostRoot) {
+		return node.stateNode;
+	}
+	return null;
+}
+
 export const renderRoot = (root) => {
     // jsx -> fiber
     console.log(root);
@@ -25,6 +43,7 @@ export const renderRoot = (root) => {
 // 渲染并创建fiber节点，组成fiber的链表结构
 function performUnitOfWork(fiber){
     const next = beginWork(fiber);
+    fiber.memoizedProps = fiber.pendingProps;
 
     if(next === null) {
         let node = fiber;
@@ -52,4 +71,6 @@ function commitRoot(root) {
     root.finishedWork = null;
     
     commitMutationEffects(finishedWork);
+
+    root.current = finishedWork;
 }

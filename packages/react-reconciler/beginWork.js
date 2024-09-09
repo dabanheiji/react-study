@@ -1,5 +1,6 @@
 import { FiberNode, createFiberFromElement, createWorkInProgress } from "./fiber";
 import { ChildDeletion, Placement } from "./fiberFlags";
+import { renderWithHooks } from "./fiberHooks";
 import { FunctionComponent, HostComponent, HostRoot, HostText } from "./workTag";
 
 export function beginWork(workInProgress) {
@@ -19,7 +20,7 @@ export function beginWork(workInProgress) {
 }
 
 function updateFunctionComponent(workInProgress) {
-    const nextChildren = workInProgress.type();
+    const nextChildren = renderWithHooks(workInProgress);
     reconcilerChildren(workInProgress, nextChildren);
     return workInProgress.child;
 }
@@ -103,7 +104,7 @@ function mountChildFibers(workInProgress, nextChildren) {
 }
 
 function updateChildFibers(workInProgress, currentFiber, nextChildren) {
-
+    console.log('nextChildren', nextChildren, currentFiber)
     if(currentFiber !== null) {
         if(Array.isArray(nextChildren)) {
             // TODO 多节点场景
@@ -118,10 +119,12 @@ function updateChildFibers(workInProgress, currentFiber, nextChildren) {
             const key = nextChildren.key;
             if(currentFiber.key === key) {
                 if(currentFiber.type === nextChildren.type) {
+
                     // 可以复用
                     const existing = useFiber(currentFiber, nextChildren.props);
                     existing.return = workInProgress;
-                    return existing;
+                    workInProgress.child = existing;
+                    return
                 }
                 // key相同，但是type不同，不能复用，删除节点
                 deleteChild(workInProgress, currentFiber);
@@ -131,22 +134,23 @@ function updateChildFibers(workInProgress, currentFiber, nextChildren) {
             }
             return
         }
-
+        
+        
         if(typeof nextChildren === 'string' || typeof nextChildren === 'number') {
             // 文本节点只需要判断更新后还是文本节点吗，只要是文本节点一定可以复用
             if(currentFiber.tag === HostText) {
                 const existing = useFiber(currentFiber, { content: nextChildren });
                 existing.return = workInProgress;
-                return existing;
+                workInProgress.child = existing;
+                return
             }
             // 不是文本节点，删除
             deleteChild(workInProgress, currentFiber);
         }
-
     }
 
     // 说明是更新阶段新出现的节点，需要打上Placement标记
-    console.log('nextChildren', nextChildren, workInProgress);
+    console.log('new nextChildren', nextChildren, workInProgress);
     const fiber = createFiberFromElement(nextChildren);
     fiber.return = workInProgress;
     fiber.flags |= Placement;
@@ -174,6 +178,7 @@ function deleteChild(returnFiber, childToDelete) {
  * @returns {FiberNode}
  */
 function useFiber(fiber, pendingProps) {
+    console.log('useFiber', fiber, pendingProps)
     const clone = createWorkInProgress(fiber, pendingProps);
     clone.index = 0;
     clone.sibling = null;
